@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from .. import crud, schemas, auth, database
 
 router = APIRouter(
-    prefix="/auth",
     tags=["auth"]
 )
 
