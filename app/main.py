@@ -38,6 +38,6 @@ if os.path.exists(STATIC_DIR):
 
 get_db = database.get_db
 
-app.include_router(auth_router.router, prefix="/auth", tags=["Authentication"])
-app.include_router(reports_router.router, prefix="/reports", tags=["Reports"])
+app.include_router(auth_router.router)
+app.include_router(reports_router.router)
 
