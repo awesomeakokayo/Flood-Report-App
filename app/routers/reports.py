@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import crud, schemas, database, dependencies
 
 router = APIRouter(
-    prefix="/reports",
+    prefix="/reports"
     tags=["reports"]
 )
 

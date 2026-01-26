@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from .. import crud, schemas, auth, database
 
 router = APIRouter(
-    tags=["auth"]
+    prefix="/auth"
+    tags=["authentication"]
 )
 
 @router.post("/register", response_model=schemas.User)
