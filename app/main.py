@@ -5,11 +5,10 @@ from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
 
-import auth
-import database
-import models
-from routers import auth as auth_router
-from routers import reports as reports_router
+from . import auth
+from . import database
+from . import models
+from . import reports
 
 load_dotenv()
 
