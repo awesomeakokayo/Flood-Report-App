@@ -2,9 +2,9 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 const BASE_URL = Platform.select({
-  android: "https://flood-report-api.onrender.com",
-  ios: "https://flood-report-api.onrender.com",
-  default: "https://flood-report-api.onrender.com",
+    android: "https://flood-report-app.onrender.com",
+    ios: "https://flood-report-app.onrender.com",
+    default: "https://flood-report-app.onrender.com",
 });
 
 const api = axios.create({
