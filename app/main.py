@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from .database import engine
 from .models import Base
 
-from .routers import auth as auth_router
-from .routers import reports as reports_router
+from .routers.auth import auth as auth_router
+from .routers.reports import reports as reports_router
 
 load_dotenv()
 
