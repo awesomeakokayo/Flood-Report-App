@@ -41,5 +41,5 @@ if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Include routers
-app.include_router(auth_router.router, prefix="/auth", tags=["authentication"])
-app.include_router(reports_router.router, prefix="/reports", tags=["reports"])
+app.include_router(auth_router.router)
+app.include_router(reports_router.router)
