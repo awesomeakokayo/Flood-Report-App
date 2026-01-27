@@ -3,10 +3,11 @@ uvicorn[standard]
 sqlalchemy
 python-dotenv
 python-multipart
-passlib[bcrypt]
 python-jose[cryptography]
 psycopg2-binary
 requests
 pydantic[email]
 bcrypt
 pillow
+passlib[bcrypt]==1.7.4
+bcrypt==4.1.2
