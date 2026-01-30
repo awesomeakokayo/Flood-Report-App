@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ALERTS } from '../data/mockData';
+import { useFocusEffect } from '@react-navigation/native';
+import { reports } from '../services/api';
+// import { ALERTS } from '../data/mockData'; // Removed mock data import
 
 const COLORS = {
     primary: '#003366',
@@ -14,6 +16,34 @@ const COLORS = {
 
 export default function FloodAlertsScreen() {
     const [activeTab, setActiveTab] = useState<'Active' | 'Past'>('Active');
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchReports = async () => {
+        try {
+            const data = await reports.getAll();
+            // Transform reports to alert format
+            const mappedAlerts = data.map((report: any) => ({
+                id: report.id.toString(),
+                title: report.location,
+                body: report.description || "No description provided",
+                time: new Date(report.reported_at).toLocaleString(),
+                level: report.severity.charAt(0).toUpperCase() + report.severity.slice(1), // Capitalize
+                is_connected: true
+            }));
+            setAlerts(mappedAlerts.reverse()); // Show newest first
+        } catch (error) {
+            console.log("Error fetching alerts", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchReports();
+        }, [])
+    );
 
     const renderAlertItem = ({ item }: { item: any }) => {
         let iconName: keyof typeof Ionicons.glyphMap = 'warning';
@@ -81,7 +111,7 @@ export default function FloodAlertsScreen() {
 
             {/* List */}
             <FlatList
-                data={ALERTS}
+                data={alerts}
                 renderItem={renderAlertItem}
                 keyExtractor={item => item.id}
                 contentContainerStyle={styles.listContent}

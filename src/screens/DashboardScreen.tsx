@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { reports } from '../services/api';
 
 const COLORS = {
     primary: '#003366',
@@ -15,6 +16,30 @@ const COLORS = {
 
 export default function DashboardScreen() {
     const navigation = useNavigation<any>();
+    const [incidents, setIncidents] = React.useState<any[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    const fetchReports = async () => {
+        try {
+            const data = await reports.getAll();
+            setIncidents(data);
+        } catch (error) {
+            console.log("Error fetching reports", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchReports();
+        }, [])
+    );
+
+    const activeAlerts = incidents.length;
+    const severeIncidents = incidents.filter(i => i.severity?.toLowerCase() === 'severe' || i.severity?.toLowerCase() === 'critical').length;
+    const riskLevel = severeIncidents > 0 ? 'Critical' : activeAlerts > 5 ? 'High' : activeAlerts > 0 ? 'Moderate' : 'Low';
+    const riskColor = riskLevel === 'Critical' ? COLORS.danger : riskLevel === 'High' ? COLORS.warning : riskLevel === 'Moderate' ? COLORS.info : COLORS.safe;
 
     return (
         <View style={styles.container}>
@@ -50,13 +75,13 @@ export default function DashboardScreen() {
                             <Text style={styles.cardTitle}>Flood Alerts</Text>
                         </View>
                         <View style={styles.cardRight}>
-                            <Text style={styles.cardNumber}>5</Text>
+                            <Text style={styles.cardNumber}>{activeAlerts}</Text>
                             <Text style={styles.cardLabel}>Active Alerts</Text>
                         </View>
                     </TouchableOpacity>
 
                     {/* Risk Level (Orange) */}
-                    <View style={[styles.card, { backgroundColor: COLORS.warning }]}>
+                    <View style={[styles.card, { backgroundColor: riskColor }]}>
                         <View style={styles.cardLeft}>
                             <View style={styles.iconContainer}>
                                 <Ionicons name="alert-circle" size={24} color="white" />
@@ -64,7 +89,7 @@ export default function DashboardScreen() {
                             <Text style={styles.cardTitle}>Flood Risk</Text>
                         </View>
                         <View style={styles.cardRight}>
-                            <Text style={styles.cardNumberSmall}>High</Text>
+                            <Text style={styles.cardNumberSmall}>{riskLevel}</Text>
                             <Text style={styles.cardLabel}>Risk</Text>
                         </View>
                     </View>
@@ -96,15 +121,17 @@ export default function DashboardScreen() {
                         liteMode={true}
                         pointerEvents="none"
                     >
-                        <Marker coordinate={{ latitude: 6.5244, longitude: 3.3792 }} title="Lagos">
-                            <Ionicons name="location" size={24} color={COLORS.danger} />
-                        </Marker>
-                        <Marker coordinate={{ latitude: 7.3775, longitude: 3.9470 }} title="Ibadan">
-                            <Ionicons name="location" size={24} color={COLORS.danger} />
-                        </Marker>
-                        <Marker coordinate={{ latitude: 7.2571, longitude: 5.2058 }} title="Akure">
-                            <Ionicons name="location" size={24} color={COLORS.danger} />
-                        </Marker>
+                        {incidents.slice(0, 5).map((incident) => (
+                            incident.latitude && incident.longitude && (
+                                <Marker
+                                    key={incident.id}
+                                    coordinate={{ latitude: incident.latitude, longitude: incident.longitude }}
+                                    title={incident.location}
+                                >
+                                    <Ionicons name="location" size={24} color={COLORS.danger} />
+                                </Marker>
+                            )
+                        ))}
                     </MapView>
                 </View>
 

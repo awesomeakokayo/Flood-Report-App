@@ -27,10 +27,13 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_flood_reports(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.FloodReport).offset(skip).limit(limit).all()
 
-def create_flood_report(db: Session, report: schemas.FloodReportCreate, user_id: int):
+def create_flood_report(db: Session, report: schemas.FloodReportCreate, user_id: int, image_name: str = None, image_mime: str = None, is_verified: bool = False):
     db_report = models.FloodReport(
         **report.dict(),
-        user_id=user_id
+        user_id=user_id,
+        image_name=image_name,
+        image_mime=image_mime,
+        is_verified=is_verified
     )
     db.add(db_report)
     db.commit()

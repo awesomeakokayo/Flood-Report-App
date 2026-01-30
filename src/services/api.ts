@@ -47,8 +47,12 @@ export const reports = {
         const response = await api.get('/reports/');
         return response.data;
     },
-    create: async (reportData) => {
-        const response = await api.post('/reports/', reportData);
+    create: async (formData: FormData) => {
+        const response = await api.post('/reports/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     },
 };
