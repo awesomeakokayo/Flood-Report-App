@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_IMAGE_MODEL = "gemini-1.5-flash" # More recent and cheaper
-GEMINI_VIDEO_MODEL = "gemini-1.5-flash"
+GEMINI_IMAGE_MODEL = "gemini-3-flash-preview" # More recent and cheaper
+GEMINI_VIDEO_MODEL = "gemini-3-flash-preview"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
 MAX_IMAGE_MB = 10
