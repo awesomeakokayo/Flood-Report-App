@@ -52,3 +52,16 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class DeviceTokenBase(BaseModel):
+    token: str
+
+class DeviceTokenCreate(DeviceTokenBase):
+    pass
+
+class DeviceToken(DeviceTokenBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

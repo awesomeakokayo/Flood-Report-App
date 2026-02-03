@@ -57,4 +57,13 @@ class FloodReport(Base):
     reported_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_verified = Column(Boolean, default=False)
     # Relationships
+    # Relationships
     user = relationship("User", back_populates="reports")
+
+
+class DeviceToken(Base):
+    __tablename__ = "device_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String(500), unique=True, index=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

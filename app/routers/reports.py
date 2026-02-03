@@ -16,8 +16,12 @@ def read_reports(skip: int = 0, limit: int = 100, db: Session = Depends(database
     reports = crud.get_flood_reports(db, skip=skip, limit=limit)
     return reports
 
+from fastapi import BackgroundTasks
+from ..services import notification
+
 @router.post("/", response_model=schemas.FloodReport)
 async def create_report(
+    background_tasks: BackgroundTasks,
     location: str = Form(...),
     latitude: float = Form(...),
     longitude: float = Form(...),
@@ -70,7 +74,7 @@ async def create_report(
         description=description
     )
 
-    return crud.create_flood_report(
+    new_report = crud.create_flood_report(
         db=db, 
         report=report_data, 
         user_id=current_user.id,
@@ -78,3 +82,13 @@ async def create_report(
         image_mime=image_mime,
         is_verified=is_verified
     )
+
+    # Schedule notification
+    background_tasks.add_task(
+        notification.send_broadcast_notification,
+        title="New Flood Alert",
+        body=f"Flood reported at {location}: {severity} severity.",
+        db=db
+    )
+
+    return new_report

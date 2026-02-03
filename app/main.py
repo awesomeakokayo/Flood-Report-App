@@ -9,8 +9,13 @@ from .models import Base
 
 from .routers import auth as auth_router
 from .routers import reports as reports_router
+from .routers import notifications as notifications_router
+from . import firebase
 
 load_dotenv()
+
+# Initialize Firebase
+firebase.initialize_firebase()
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -43,3 +48,4 @@ if os.path.exists(STATIC_DIR):
 # Include routers
 app.include_router(auth_router.router)
 app.include_router(reports_router.router)
+app.include_router(notifications_router.router)
