@@ -22,7 +22,10 @@ async def verify_flood_media(media_bytes: bytes, content_type: str):
         print("Warning: GEMINI_API_KEY not set. Verification skipped.")
         return {"verified": True, "status": "no_key", "reason": "API Key missing"}
 
-    is_image = content_type in ["image/jpeg", "image/png", "image/jpg"]
+    is_image = content_type in [
+        "image/jpeg", "image/jpg", "image/png", "image/webp",
+        "image/gif", "image/heic", "image/heif", "image/bmp",
+    ]
     is_video = content_type in ["video/mp4", "video/webm", "video/quicktime"]
 
     if not (is_image or is_video):
@@ -82,15 +85,33 @@ async def verify_flood_media(media_bytes: bytes, content_type: str):
             return {"verified": False, "status": "error", "reason": "Gemini analysis failed"}
 
         ai_response = response.json()
-        ai_text = ai_response["candidates"][0]["content"]["parts"][0]["text"]
-        
+
+        try:
+            ai_text = ai_response["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError, TypeError):
+            reason = ai_response.get("promptFeedback", {}).get(
+                "blockReason", "No content generated"
+            )
+            print(f"Gemini empty/blocked response: {ai_response}")
+            return {"verified": False, "status": "error", "reason": f"Gemini blocked: {reason}"}
+
         # Strip potential markdown code blocks
-        if ai_text.startswith("```json"):
-            ai_text = ai_text[7:-3].strip()
-        elif ai_text.startswith("```"):
-            ai_text = ai_text[3:-3].strip()
-            
-        ai_result = json.loads(ai_text)
+        ai_text = ai_text.strip()
+        if ai_text.startswith("```"):
+            ai_text = ai_text.split("\n", 1)[-1] if "\n" in ai_text else ai_text[3:]
+            ai_text = ai_text.rsplit("```", 1)[0].strip()
+
+        # Extract JSON robustly (models sometimes add trailing text)
+        try:
+            ai_result = json.loads(ai_text)
+        except json.JSONDecodeError:
+            start = ai_text.find("{")
+            end = ai_text.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                ai_result = json.loads(ai_text[start:end + 1])
+            else:
+                print(f"Gemini non-JSON response: {ai_text[:500]}")
+                return {"verified": False, "status": "error", "reason": "Invalid AI response format"}
         
         confidence = ai_result.get("confidence", 0)
         is_flood = ai_result.get("is_flood", False)

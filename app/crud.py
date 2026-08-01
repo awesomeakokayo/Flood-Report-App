@@ -29,7 +29,7 @@ def get_flood_reports(db: Session, skip: int = 0, limit: int = 100):
 
 def create_flood_report(db: Session, report: schemas.FloodReportCreate, user_id: int, image_name: str = None, image_mime: str = None, is_verified: bool = False):
     db_report = models.FloodReport(
-        **report.dict(),
+        **report.model_dump(),
         user_id=user_id,
         image_name=image_name,
         image_mime=image_mime,

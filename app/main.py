@@ -1,8 +1,12 @@
+import os
+from dotenv import load_dotenv
+
+# Load environment variables BEFORE importing any module that reads them
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
-from dotenv import load_dotenv
 
 from .database import engine
 from .models import Base
@@ -12,13 +16,14 @@ from .routers import reports as reports_router
 from .routers import notifications as notifications_router
 from . import firebase
 
-load_dotenv()
-
 # Initialize Firebase
 firebase.initialize_firebase()
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create tables (don't crash the server if the DB is temporarily unavailable)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: could not create tables: {e}")
 
 app = FastAPI(title="Flood Report API")
 
